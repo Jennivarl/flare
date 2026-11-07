@@ -10,7 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   :root {
-    --bg: #0d0d0c; --panel: #131311; --raise: #1a1a17; --line: #262522; --text: #ecebe6; --muted: #8f8c84; --faint: #5d5b55;
+    --bg: #0d0d0c; --panel: #131311; --raise: #1a1a17; --line: rgba(236,235,230,.08); --text: #ecebe6; --muted: #8f8c84; --faint: #5d5b55;
     --flare: #ff5b1f; --high: #f2a541; --med: #c9b458; --low: #7d7b75; --ok: #4cc38a; --rumour: #9b8afb;
     --sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
   }
@@ -18,10 +18,10 @@
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 var(--sans); -webkit-font-smoothing: antialiased; }
   .app { display: grid; grid-template-rows: 56px 1fr; height: 100vh; }
   header { display: flex; align-items: center; gap: 14px; padding: 0 24px; border-bottom: 1px solid var(--line); }
-  .mark { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -.3px; }
-  .mark i { width: 10px; height: 10px; border-radius: 50%; background: var(--flare); box-shadow: 0 0 0 4px rgba(255,91,31,.15); }
-  .mark small { font-weight: 500; color: var(--muted); font-size: 13px; letter-spacing: 0; }
-  .meta { margin-left: auto; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .mark { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 18px; letter-spacing: -.3px; }
+  .mark i { width: 8px; height: 8px; border-radius: 50%; background: var(--flare); }
+  .mark small { font-weight: 400; color: var(--muted); font-size: 13px; letter-spacing: 0; }
+  .meta { margin-left: auto; font: 400 12px var(--mono); color: var(--muted); }
   .grid { display: grid; grid-template-columns: 360px 1fr 430px; min-height: 0; }
   body:not(.demo) .grid { grid-template-columns: 360px 1fr; }
   body:not(.demo) .room { display: none; }
@@ -31,32 +31,31 @@
   .progress { display: grid; grid-auto-flow: column; gap: 4px; }
   .progress span { height: 3px; border-radius: 2px; background: var(--line); }
   .progress span.on { background: var(--flare); }
-  .step { font: 500 12px var(--mono); color: var(--muted); letter-spacing: 1px; }
+  .step { font: 400 12px var(--mono); color: var(--muted); }
   .step b { color: var(--text); font-weight: 500; }
-  .caption { font-size: 25px; line-height: 1.22; font-weight: 600; letter-spacing: -.5px; min-height: 124px; }
+  .caption { font-size: 28px; line-height: 1.2; font-weight: 500; letter-spacing: -.6px; min-height: 136px; }
   .caption em { font-style: normal; color: var(--flare); }
   .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
   .metric { background: var(--panel); padding: 14px 16px; }
-  .metric b { display: block; font: 500 30px/1.1 var(--mono); letter-spacing: -1px; }
+  .metric b { display: block; font: 400 32px/1.1 var(--mono); font-variant-numeric: tabular-nums; }
   .metric span { color: var(--muted); font-size: 12px; }
-  .metric.ok b { color: var(--ok); } .metric.flare b { color: var(--flare); } .metric.rumour b { color: var(--rumour); }
-  .label { font: 500 11px var(--mono); color: var(--faint); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px; }
+  .metric.flare b { color: var(--flare); }
+  .label { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
   .log { display: flex; flex-direction: column; gap: 9px; overflow: hidden; }
   .log div { display: grid; grid-template-columns: 62px 1fr; gap: 8px; font-size: 12.5px; color: #c9c7c0; }
-  .log div b { font: 500 11px var(--mono); color: var(--muted); padding-top: 2px; }
+  .log div b { font: 400 11px var(--mono); color: var(--muted); padding-top: 2px; }
   .log div.fresh { color: var(--text); }
 
   /* map */
   .mapwrap { position: relative; min-height: 0; }
   #map { position: absolute; inset: 0; background: #11110f; }
   .gray-tiles { filter: grayscale(1) invert(1) brightness(.62) contrast(1.15); }
-  .legend { position: absolute; left: 16px; bottom: 16px; z-index: 500; display: flex; gap: 14px; padding: 9px 14px; background: rgba(13,13,12,.88); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; color: var(--muted); }
+  .legend { position: absolute; left: 16px; bottom: 16px; z-index: 500; display: flex; gap: 16px; padding: 8px 12px; background: rgba(13,13,12,.88); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; color: var(--muted); }
   .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
-  .sim { position: absolute; right: 16px; bottom: 16px; z-index: 500; font: 500 10.5px var(--mono); color: var(--faint); letter-spacing: .8px; text-transform: uppercase; }
+  .sim { position: absolute; right: 16px; bottom: 24px; z-index: 500; font: 400 11px var(--mono); color: var(--faint); }
   .pt { border-radius: 50%; border: 2px solid var(--bg); }
-  .pt.live { box-shadow: 0 0 0 0 rgba(255,91,31,.6); animation: ring 1.8s infinite; }
-  @keyframes ring { to { box-shadow: 0 0 0 14px rgba(255,91,31,0); } }
-  .res { font: 600 10px var(--mono); color: var(--bg); background: var(--text); border-radius: 3px; text-align: center; line-height: 16px; }
+  .pt.live { box-shadow: 0 0 0 4px rgba(255,91,31,.22); }
+  .res { font: 500 10px var(--mono); color: var(--bg); background: var(--text); border-radius: 3px; text-align: center; line-height: 16px; }
   .res.busy { background: var(--ok); }
   .leaflet-control-attribution { background: rgba(13,13,12,.7) !important; color: var(--faint) !important; font-size: 10px; }
   .leaflet-control-attribution a { color: var(--muted) !important; }
@@ -67,25 +66,25 @@
   /* switch room */
   .room { border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: var(--panel); }
   .room-head { padding: 16px 20px; border-bottom: 1px solid var(--line); }
-  .room-head b { font-size: 15px; } .room-head b span { color: var(--faint); }
+  .room-head b { font-size: 15px; font-weight: 500; } .room-head b span { color: var(--faint); }
   .room-head small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
   .chat { flex: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px 0 14px; }
   .msg { display: grid; grid-template-columns: 32px 1fr; gap: 11px; padding: 9px 20px; }
   .msg.fresh { animation: rise .45s ease-out; }
   @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
-  .av { width: 32px; height: 32px; border-radius: 7px; display: grid; place-items: center; font: 600 12px var(--sans); background: var(--raise); color: var(--text); border: 1px solid var(--line); }
-  .av.agent { background: #2b1c14; color: var(--flare); border-color: #4a2a1a; }
+  .av { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; font: 500 12px var(--sans); background: var(--raise); color: var(--text); border: 1px solid var(--line); }
+  .av.agent { background: var(--raise); color: var(--text); }
   .av.switch, .av.approval { color: var(--muted); }
-  .name { font-weight: 600; font-size: 13.5px; }
-  .tag { font: 500 10px var(--mono); color: var(--flare); margin-left: 7px; text-transform: uppercase; letter-spacing: .8px; }
+  .name { font-weight: 500; font-size: 14px; }
+  .tag { font: 400 11px var(--mono); color: var(--muted); margin-left: 8px; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
   .when { font: 400 11px var(--mono); color: var(--faint); margin-left: 7px; }
-  .txt { color: #d7d5ce; font-size: 13.5px; margin-top: 2px; }
+  .txt { color: #d7d5ce; font-size: 14px; margin-top: 4px; }
   .msg.switch .txt { color: var(--muted); }
   .approve { margin-top: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: var(--bg); }
-  .approve .q { font-size: 13px; color: var(--text); }
+  .approve .q { font-size: 13px; color: var(--text); font-weight: 500; }
   .approve code { display: block; font: 12px var(--mono); color: var(--high); margin-top: 4px; }
   .approve .btns { display: flex; gap: 8px; margin-top: 10px; }
-  .approve .btns span { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid var(--line); color: var(--muted); }
+  .approve .btns span { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1px solid var(--line); color: var(--muted); }
   .approve .btns .ok { background: var(--text); color: var(--bg); border-color: var(--text); }
   @media (max-width: 1100px) { .grid, body:not(.demo) .grid { grid-template-columns: 1fr; } .story, .room { border: 0; } .mapwrap { height: 60vh; } .app { height: auto; } }
 </style>
@@ -100,7 +99,7 @@
     <section class="story">
       <div>
         <div class="progress" id="progress"></div>
-        <div class="step" id="step" style="margin-top:12px">LIVE BOARD</div>
+        <div class="step" id="step" style="margin-top:12px">Live board</div>
       </div>
       <div class="caption" id="caption">Waiting for the first report.</div>
       <div class="metrics" id="metrics"></div>
@@ -116,7 +115,7 @@
         <span><i style="background:var(--med)"></i>Medium</span><span><i style="background:var(--ok)"></i>Rescued</span>
         <span><i style="background:var(--rumour)"></i>Rumour</span>
       </div>
-      <div class="sim">Simulated scenario · fictional people</div>
+      <div class="sim">Simulated scenario, fictional people</div>
     </div>
     <section class="room" id="room">
       <div class="room-head"><b><span>#</span> flare-hq</b><small>Switch room · Mattermost, with field volunteers on Telegram</small></div>
@@ -166,7 +165,7 @@ function renderChat(upto) {
 
 const metric = (label, value, cls = '') => `<div class="metric ${cls}"><b>${value}</b><span>${label}</span></div>`;
 function emphasise(text) {
-  return esc(text).replace(/(RUMOUR BLOCKED|Nothing is dropped|human|rescued|exclusive 'dispatcher' role|Allow)/g, '<em>$1</em>');
+  return esc(text).replace(/(Rumour blocked|Nothing is dropped|human at HQ approves|exclusive 'dispatcher' role|presses Allow)/, '<em>$1</em>');
 }
 
 async function tick() {
@@ -177,8 +176,8 @@ async function tick() {
     const n = frames.length;
     $('progress').style.gridTemplateColumns = `repeat(${n}, 1fr)`;
     $('progress').innerHTML = Array.from({ length: n }, (_, i) => `<span class="${i < idx ? 'on' : ''}"></span>`).join('');
-    $('step').innerHTML = `STEP <b>${String(idx).padStart(2, '0')}</b> / ${n}`;
-    $('caption').innerHTML = emphasise(s.caption || '');
+    $('step').innerHTML = `Step <b>${idx}</b> of ${n}`;
+    $('caption').innerHTML = emphasise((s.caption || '').replace(/\.$/, ''));
     $('meta').textContent = 'Recorded run · Lagos flood scenario';
     renderChat(idx);
   } else {

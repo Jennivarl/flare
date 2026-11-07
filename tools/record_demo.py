@@ -89,7 +89,7 @@ snap("@verify finds the same Makoko family reported 3 times and merges the repor
 
 run("--by", "verify", "claim", "Third Mainland Bridge collapsed", "--verdict", "false",
     "--reason", "2 eyewitnesses on the bridge say it stands; reports trace back to one WhatsApp video", "--cases", "2", "5", "8", "12")
-snap("RUMOUR BLOCKED. No boats wasted on the bridge (phantom deployment avoided).")
+snap("Rumour blocked. No boats wasted on the bridge (phantom deployment avoided).")
 
 run("--by", "dispatch", "dispatch", "propose", "1", "boat-1")
 run("--by", "dispatch", "dispatch", "propose", "6", "med-1")
@@ -128,7 +128,7 @@ CHAT = [
     [("Tunde · field (Telegram)", H, "I dey for Third Mainland now. Bridge never fall, na traffic o."),
      ("intake", A, "6 more cases. 2 eyewitnesses are ON the bridge.")],
     [("verify", A, "Merged 3 reports of the same Makoko family into case #1 (Mama Bisi + 3 children).")],
-    [("verify", A, "RUMOUR BLOCKED: bridge collapse. 2 eyewitnesses on the bridge; all reports trace to one WhatsApp video. Ready for @dispatcher: #1, #6, #13.")],
+    [("verify", A, "Rumour blocked: bridge collapse. 2 eyewitnesses on the bridge; all reports trace to one WhatsApp video. Ready for @dispatcher: #1, #6, #13.")],
     [("dispatch", A, "#1 Makoko roof → Rescue Boat 1, ETA 8 min · #6 Oworonshoki, labour → Medical Team Alpha · #13 Ajah, 2 men in water → Rescue Boat 3. Approve?"),
      ("Switch", "approval", "dispatch wants to run: dispatch send 1, 2, 3")],
     [("Ada · HQ", H, "Yes. Send them."),
