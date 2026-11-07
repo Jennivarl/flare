@@ -42,7 +42,8 @@
   .pin { border-radius: 50%; border: 2px solid rgba(255,255,255,.85); box-shadow: 0 0 0 4px rgba(255,77,79,.25); }
   .pin.pulse { animation: ring 1.4s infinite; }
   @keyframes ring { 0% { box-shadow: 0 0 0 0 rgba(255,77,79,.7); } 100% { box-shadow: 0 0 0 16px rgba(255,77,79,0); } }
-  .res { font-size: 18px; filter: drop-shadow(0 0 3px #000); }
+  .res { font-size: 20px; line-height: 22px; filter: drop-shadow(0 0 3px #000); }
+  .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(.8) contrast(.9) saturate(.6); }
   .sim { position: absolute; bottom: 8px; left: 8px; z-index: 500; background: rgba(0,0,0,.6); color: var(--muted); font-size: 11px; padding: 4px 8px; border-radius: 4px; }
   @media (max-width: 860px) { main { grid-template-columns: 1fr; height: auto; } #map { height: 60vh; } aside { border-left: 0; } }
 </style>
@@ -71,8 +72,8 @@
 </main>
 <script>
 const map = L.map('map', { zoomControl: true }).setView([6.50, 3.43], 12);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 18
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 18, className: 'dark-tiles'
 }).addTo(map);
 
 const layers = { cases: L.layerGroup().addTo(map), res: L.layerGroup().addTo(map), lines: L.layerGroup().addTo(map), zones: L.layerGroup().addTo(map) };
