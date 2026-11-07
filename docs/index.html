@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flare</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 28 28%22%3E%3Ccircle cx=%2214%22 cy=%2214%22 r=%228%22 fill=%22%23ff5b1f%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -19,7 +20,7 @@
   .app { display: grid; grid-template-rows: 56px 1fr; height: 100vh; }
   header { display: flex; align-items: center; gap: 14px; padding: 0 24px; border-bottom: 1px solid var(--line); }
   .mark { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 18px; letter-spacing: -.3px; }
-  .mark i { width: 8px; height: 8px; border-radius: 50%; background: var(--flare); }
+  .mark .logo { width: 30px; height: 30px; } .mark span { font-weight: 500; font-size: 19px; letter-spacing: -.4px; } .mark small { padding-left: 12px; margin-left: 2px; border-left: 1px solid var(--line); }
   .mark small { font-weight: 400; color: var(--muted); font-size: 13px; letter-spacing: 0; }
   .meta { margin-left: auto; font: 400 12px var(--mono); color: var(--muted); }
   .grid { display: grid; grid-template-columns: 360px 1fr 430px; min-height: 0; }
@@ -27,21 +28,21 @@
   body:not(.demo) .room { display: none; }
 
   /* story column */
-  .story { border-right: 1px solid var(--line); padding: 28px 24px; display: flex; flex-direction: column; gap: 26px; overflow: hidden; }
+  .story { border-right: 1px solid var(--line); padding: 32px 28px; display: flex; flex-direction: column; gap: 36px; overflow: hidden; }
   .progress { display: grid; grid-auto-flow: column; gap: 4px; }
   .progress span { height: 3px; border-radius: 2px; background: var(--line); }
   .progress span.on { background: var(--flare); }
   .step { font: 400 12px var(--mono); color: var(--muted); }
   .step b { color: var(--text); font-weight: 500; }
-  .caption { font-size: 28px; line-height: 1.2; font-weight: 500; letter-spacing: -.6px; min-height: 136px; }
+  .caption { font-size: 26px; line-height: 1.25; font-weight: 500; letter-spacing: -.5px; }
   .caption em { font-style: normal; color: var(--flare); }
   .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-  .metric { background: var(--panel); padding: 14px 16px; }
+  .metric { background: var(--panel); padding: 16px 20px; }
   .metric b { display: block; font: 400 32px/1.1 var(--mono); font-variant-numeric: tabular-nums; }
   .metric span { color: var(--muted); font-size: 12px; }
   .metric.flare b { color: var(--flare); }
   .label { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-  .log { display: flex; flex-direction: column; gap: 9px; overflow: hidden; }
+  body.demo .log-wrap { display: none; } .log { display: flex; flex-direction: column; gap: 9px; overflow: hidden; }
   .log div { display: grid; grid-template-columns: 62px 1fr; gap: 8px; font-size: 12.5px; color: #c9c7c0; }
   .log div b { font: 400 11px var(--mono); color: var(--muted); padding-top: 2px; }
   .log div.fresh { color: var(--text); }
@@ -92,7 +93,7 @@
 <body>
 <div class="app">
   <header>
-    <div class="mark"><i></i>Flare <small>crisis control room on Switch</small></div>
+    <div class="mark"><svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><path d="M4 25 C 8 18, 12 12.5, 18.5 8.5" fill="none" stroke="#8f8c84" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="0.01 3.6"/><circle cx="21" cy="7" r="7" fill="#ff5b1f" opacity=".16"/><circle cx="21" cy="7" r="3.6" fill="#ff5b1f"/></svg><span>Flare</span><small>Crisis control room on Switch</small></div>
     <div class="meta" id="meta">connecting</div>
   </header>
   <div class="grid">
@@ -103,10 +104,7 @@
       </div>
       <div class="caption" id="caption">Waiting for the first report.</div>
       <div class="metrics" id="metrics"></div>
-      <div style="min-height:0;display:flex;flex-direction:column">
-        <div class="label">Board activity</div>
-        <div class="log" id="log"></div>
-      </div>
+      <div class="log-wrap" id="logwrap"><div class="label">Board activity</div><div class="log" id="log"></div></div>
     </section>
     <div class="mapwrap">
       <div id="map"></div>
@@ -186,9 +184,8 @@ async function tick() {
     $('caption').textContent = e ? `${e.actor}: ${e.text}` : 'Waiting for the first report.';
   }
   $('metrics').innerHTML =
-    metric('People rescued', st.people_rescued, 'ok') + metric('People waiting', st.people_waiting, 'flare') +
-    metric('Rumours blocked', st.rumours_blocked, 'rumour') + metric('Duplicates merged', st.duplicates_merged) +
-    metric('Messages in', st.messages_in) + metric('Boats and teams free', `${st.resources_free}/${st.resources_total}`);
+    metric('People waiting', st.people_waiting, 'flare') + metric('People rescued', st.people_rescued) +
+    metric('Rumours blocked', st.rumours_blocked) + metric('Boats and teams free', `${st.resources_free}/${st.resources_total}`);
   $('log').innerHTML = s.events.slice(0, 7).map((e, i) =>
     `<div class="${i === 0 ? 'fresh' : ''}"><b>${esc(e.actor)}</b><span>${esc(e.text)}</span></div>`).join('');
 
@@ -215,7 +212,7 @@ async function tick() {
   }
 }
 tick();
-if (!FIXED) setInterval(tick, DEMO ? 5600 : 1500);
+if (!FIXED) setInterval(tick, DEMO ? 4000 : 1500);
 </script>
 </body>
 </html>
