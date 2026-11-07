@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flare: Live Board</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0f14; --panel: #121820; --line: #1f2a36; --text: #e6edf3; --muted: #8b98a5;
+    --crit: #ff4d4f; --high: #ff8c1a; --med: #f5c518; --low: #5cc8ff; --ok: #33d17a; --rumour: #a970ff; --boat: #4da3ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 16px; margin: 0; letter-spacing: .3px; }
+  header .live { display: inline-flex; align-items: center; gap: 6px; color: var(--crit); font-weight: 700; font-size: 12px; }
+  header .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--crit); animation: pulse 1.2s infinite; }
+  header .sub { color: var(--muted); font-size: 12px; margin-left: auto; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--line); border-bottom: 1px solid var(--line); }
+  .stat { background: var(--panel); padding: 10px 14px; }
+  .stat b { display: block; font-size: 24px; font-variant-numeric: tabular-nums; }
+  .stat span { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
+  .stat.crit b { color: var(--crit); } .stat.ok b { color: var(--ok); } .stat.rumour b { color: var(--rumour); }
+  main { display: grid; grid-template-columns: 1fr 380px; height: calc(100% - 140px); min-height: 420px; }
+  #map { height: 100%; background: #0e141b; }
+  aside { border-left: 1px solid var(--line); overflow: auto; background: var(--panel); }
+  aside h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin: 14px 14px 6px; }
+  .ev { padding: 8px 14px; border-bottom: 1px solid var(--line); font-size: 13px; animation: slide .4s ease-out; }
+  .ev .who { font-weight: 600; margin-right: 6px; }
+  .ev .t { color: var(--muted); font-size: 11px; float: right; }
+  .ev.dispatch { border-left: 3px solid var(--ok); } .ev.claim { border-left: 3px solid var(--rumour); }
+  .ev.case { border-left: 3px solid var(--high); } .ev.merge { border-left: 3px solid var(--low); }
+  .ev.zone { border-left: 3px solid var(--boat); } .ev.propose { border-left: 3px solid var(--med); }
+  @keyframes slide { from { opacity: 0; transform: translateX(12px); } }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; padding: 8px 14px; color: var(--muted); font-size: 12px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--panel); color: var(--text); }
+  .pin { border-radius: 50%; border: 2px solid rgba(255,255,255,.85); box-shadow: 0 0 0 4px rgba(255,77,79,.25); }
+  .pin.pulse { animation: ring 1.4s infinite; }
+  @keyframes ring { 0% { box-shadow: 0 0 0 0 rgba(255,77,79,.7); } 100% { box-shadow: 0 0 0 16px rgba(255,77,79,0); } }
+  .res { font-size: 20px; line-height: 22px; filter: drop-shadow(0 0 3px #000); }
+  .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(.8) contrast(.9) saturate(.6); }
+  .caption { padding: 10px 16px; background: linear-gradient(90deg, rgba(255,77,79,.18), rgba(77,163,255,.12)); border-bottom: 1px solid var(--line); font-size: 15px; animation: slide .4s ease-out; }
+  .caption b { color: var(--crit); margin-right: 8px; font-size: 12px; letter-spacing: .5px; }
+  .sim { position: absolute; bottom: 8px; left: 8px; z-index: 500; background: rgba(0,0,0,.6); color: var(--muted); font-size: 11px; padding: 4px 8px; border-radius: 4px; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; height: auto; } #map { height: 60vh; } aside { border-left: 0; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛟 Flare</h1>
+  <span class="live"><i></i>LIVE</span>
+  <span class="sub" id="scenario">connecting…</span>
+</header>
+<div id="caption" class="caption" hidden></div>
+<section class="stats" id="stats"></section>
+<main>
+  <div style="position:relative">
+    <div id="map"></div>
+    <div class="sim">SIMULATED SCENARIO: fictional people and messages</div>
+  </div>
+  <aside>
+    <div class="legend">
+      <span><i style="background:var(--crit)"></i>Critical</span><span><i style="background:var(--high)"></i>High</span>
+      <span><i style="background:var(--med)"></i>Medium</span><span><i style="background:var(--low)"></i>Low</span>
+      <span><i style="background:var(--ok)"></i>Rescued</span><span><i style="background:var(--rumour)"></i>Rumour</span>
+    </div>
+    <h2>Room activity</h2>
+    <div id="events"></div>
+  </aside>
+</main>
+<script>
+const map = L.map('map', { zoomControl: true }).setView([6.50, 3.43], 12);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 18, className: 'dark-tiles'
+}).addTo(map);
+
+const layers = { cases: L.layerGroup().addTo(map), res: L.layerGroup().addTo(map), lines: L.layerGroup().addTo(map), zones: L.layerGroup().addTo(map) };
+const color = (c) => c.status === 'rescued' || c.status === 'closed' ? 'var(--ok)'
+  : c.status === 'rumour' ? 'var(--rumour)'
+  : ({5: 'var(--crit)', 4: 'var(--high)', 3: 'var(--med)'}[c.urgency] || 'var(--low)');
+const icons = { boat: '🚤', medical: '🩺', supplies: '🚚' };
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+let lastEvent = '';
+
+function statTile(label, value, cls = '') { return `<div class="stat ${cls}"><b>${value}</b><span>${label}</span></div>`; }
+
+// Public demo mode: anywhere except your own computer (or with ?demo), play a recorded crisis in a loop.
+const DEMO = !['127.0.0.1', 'localhost'].includes(location.hostname) || location.search.includes('demo');
+let frames = null, frameIdx = 0;
+async function nextState() {
+  if (!DEMO) return (await fetch('/api/state', { cache: 'no-store' })).json();
+  if (!frames) frames = (await (await fetch('demo.json', { cache: 'no-store' })).json()).frames;
+  const s = frames[frameIdx];
+  frameIdx = (frameIdx + 1) % frames.length;
+  return s;
+}
+
+async function tick() {
+  let s;
+  try { s = await nextState(); } catch { return; }
+  const cap = document.getElementById('caption');
+  if (DEMO && s.caption) { cap.hidden = false; cap.innerHTML = `<b>Step ${frameIdx || frames.length}/${frames.length}</b> ${esc(s.caption)}`; }
+  document.getElementById('scenario').textContent = DEMO
+    ? 'Recorded demo of a real run · github.com/Jennivarl/flare'
+    : `Scenario: ${s.scenario} · updated ${new Date().toLocaleTimeString()}`;
+  const st = s.stats;
+  document.getElementById('stats').innerHTML =
+    statTile('Messages in', st.messages_in) + statTile('Waiting triage', st.messages_waiting) +
+    statTile('Critical open', st.critical_open, 'crit') + statTile('Active cases', st.cases_active) +
+    statTile('Dispatched', st.dispatched) + statTile('People rescued', st.people_rescued, 'ok') +
+    statTile('Duplicates merged', st.duplicates_merged) + statTile('Rumours blocked', st.rumours_blocked, 'rumour') +
+    statTile('Resources free', `${st.resources_free}/${st.resources_total}`);
+
+  layers.cases.clearLayers(); layers.res.clearLayers(); layers.lines.clearLayers(); layers.zones.clearLayers();
+  for (const z of s.zones) {
+    L.circle([z.lat, z.lon], { radius: z.radius_km * 1000, color: '#4da3ff', weight: 1, dashArray: '4 4', fillOpacity: .06 })
+      .bindTooltip(`Zone room: ${esc(z.room)}`, { permanent: true, direction: 'top', className: '' }).addTo(layers.zones);
+  }
+  const caseById = {};
+  for (const c of s.cases) {
+    caseById[c.id] = c;
+    const size = 12 + Math.min(c.people || 0, 12);
+    const live = ['open', 'verifying'].includes(c.status) && c.urgency >= 5;
+    const icon = L.divIcon({ className: '', iconSize: [size, size],
+      html: `<div class="pin ${live ? 'pulse' : ''}" style="width:${size}px;height:${size}px;background:${color(c)}"></div>` });
+    L.marker([c.lat, c.lon], { icon }).bindPopup(
+      `<b>Case #${c.id} · ${esc(c.place)}</b><br>${esc(c.summary)}<br><small>Status: <b>${esc(c.status)}</b> · people: ${c.people} · reports: ${c.reports}${c.note ? '<br>' + esc(c.note) : ''}</small>`
+    ).addTo(layers.cases);
+  }
+  for (const r of s.resources) {
+    const icon = L.divIcon({ className: 'res', iconSize: [22, 22], html: `<span style="opacity:${r.status === 'available' ? 1 : .55}">${icons[r.kind] || '📦'}</span>` });
+    L.marker([r.lat, r.lon], { icon }).bindTooltip(`${esc(r.name)} (${r.status})`).addTo(layers.res);
+  }
+  for (const d of s.dispatches) {
+    const c = caseById[d.case_id], r = s.resources.find((x) => x.id === d.resource_id);
+    if (!c || !r) continue;
+    L.polyline([[r.lat, r.lon], [c.lat, c.lon]], {
+      color: d.status === 'sent' ? '#33d17a' : '#f5c518', weight: 3, dashArray: d.status === 'sent' ? null : '6 6'
+    }).bindTooltip(d.status === 'sent' ? `En route · ETA ${d.eta_min} min · approved by ${esc(d.approved_by)}` : 'Awaiting HQ approval').addTo(layers.lines);
+  }
+  const top = s.events[0] ? s.events[0].at + s.events[0].text : '';
+  if (top !== lastEvent) {
+    lastEvent = top;
+    document.getElementById('events').innerHTML = s.events.map((e) =>
+      `<div class="ev ${esc(e.kind)}"><span class="t">${new Date(e.at).toLocaleTimeString()}</span><span class="who">${esc(e.actor)}</span>${esc(e.text)}</div>`).join('');
+  }
+}
+tick(); setInterval(tick, DEMO ? 4200 : 1500);
+</script>
+</body>
+</html>

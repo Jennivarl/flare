@@ -9,7 +9,8 @@ and **five AI agents** in one Switch workspace. The agents turn the noise into a
 board, and **a named human approves every dispatch**.
 
 > Flip the Switch Hackathon · **Track 01: Best Business Workflow**
-> Demo video: _link added at submission_ · Scenario data is simulated (fictional people, real Lagos geography).
+> **Live demo (a recorded run, plays in your browser): https://jennivarl.github.io/flare/**
+> Scenario data is simulated (fictional people, real Lagos geography).
 
 ---
 

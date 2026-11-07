@@ -519,6 +519,19 @@ def cmd_log(a):
 
 # --------------------------------------------------------------------------- map server
 
+def board_state(conn) -> dict:
+    """Everything the live map needs, in one snapshot."""
+    return {
+        "scenario": scenario_name(conn),
+        "stats": stats(conn),
+        "cases": rows(conn.execute("SELECT * FROM cases WHERE status != 'duplicate'")),
+        "resources": rows(conn.execute("SELECT * FROM resources")),
+        "dispatches": rows(conn.execute("SELECT * FROM dispatches WHERE status IN ('proposed','sent')")),
+        "zones": rows(conn.execute("SELECT * FROM zones")),
+        "events": rows(conn.execute("SELECT at, actor, kind, text FROM events ORDER BY id DESC LIMIT 25")),
+    }
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -533,15 +546,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/state"):
             conn = db()
-            state = {
-                "scenario": scenario_name(conn),
-                "stats": stats(conn),
-                "cases": rows(conn.execute("SELECT * FROM cases WHERE status != 'duplicate'")),
-                "resources": rows(conn.execute("SELECT * FROM resources")),
-                "dispatches": rows(conn.execute("SELECT * FROM dispatches WHERE status IN ('proposed','sent')")),
-                "zones": rows(conn.execute("SELECT * FROM zones")),
-                "events": rows(conn.execute("SELECT at, actor, kind, text FROM events ORDER BY id DESC LIMIT 25")),
-            }
+            state = board_state(conn)
             conn.close()
             self._send(200, json.dumps(state).encode(), "application/json")
             return

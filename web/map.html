@@ -44,6 +44,8 @@
   @keyframes ring { 0% { box-shadow: 0 0 0 0 rgba(255,77,79,.7); } 100% { box-shadow: 0 0 0 16px rgba(255,77,79,0); } }
   .res { font-size: 20px; line-height: 22px; filter: drop-shadow(0 0 3px #000); }
   .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(.8) contrast(.9) saturate(.6); }
+  .caption { padding: 10px 16px; background: linear-gradient(90deg, rgba(255,77,79,.18), rgba(77,163,255,.12)); border-bottom: 1px solid var(--line); font-size: 15px; animation: slide .4s ease-out; }
+  .caption b { color: var(--crit); margin-right: 8px; font-size: 12px; letter-spacing: .5px; }
   .sim { position: absolute; bottom: 8px; left: 8px; z-index: 500; background: rgba(0,0,0,.6); color: var(--muted); font-size: 11px; padding: 4px 8px; border-radius: 4px; }
   @media (max-width: 860px) { main { grid-template-columns: 1fr; height: auto; } #map { height: 60vh; } aside { border-left: 0; } }
 </style>
@@ -54,6 +56,7 @@
   <span class="live"><i></i>LIVE</span>
   <span class="sub" id="scenario">connecting…</span>
 </header>
+<div id="caption" class="caption" hidden></div>
 <section class="stats" id="stats"></section>
 <main>
   <div style="position:relative">
@@ -86,10 +89,25 @@ let lastEvent = '';
 
 function statTile(label, value, cls = '') { return `<div class="stat ${cls}"><b>${value}</b><span>${label}</span></div>`; }
 
+// Public demo mode: anywhere except your own computer (or with ?demo), play a recorded crisis in a loop.
+const DEMO = !['127.0.0.1', 'localhost'].includes(location.hostname) || location.search.includes('demo');
+let frames = null, frameIdx = 0;
+async function nextState() {
+  if (!DEMO) return (await fetch('/api/state', { cache: 'no-store' })).json();
+  if (!frames) frames = (await (await fetch('demo.json', { cache: 'no-store' })).json()).frames;
+  const s = frames[frameIdx];
+  frameIdx = (frameIdx + 1) % frames.length;
+  return s;
+}
+
 async function tick() {
   let s;
-  try { s = await (await fetch('/api/state', { cache: 'no-store' })).json(); } catch { return; }
-  document.getElementById('scenario').textContent = `Scenario: ${s.scenario} · updated ${new Date().toLocaleTimeString()}`;
+  try { s = await nextState(); } catch { return; }
+  const cap = document.getElementById('caption');
+  if (DEMO && s.caption) { cap.hidden = false; cap.innerHTML = `<b>Step ${frameIdx || frames.length}/${frames.length}</b> ${esc(s.caption)}`; }
+  document.getElementById('scenario').textContent = DEMO
+    ? 'Recorded demo of a real run · github.com/Jennivarl/flare'
+    : `Scenario: ${s.scenario} · updated ${new Date().toLocaleTimeString()}`;
   const st = s.stats;
   document.getElementById('stats').innerHTML =
     statTile('Messages in', st.messages_in) + statTile('Waiting triage', st.messages_waiting) +
@@ -132,7 +150,7 @@ async function tick() {
       `<div class="ev ${esc(e.kind)}"><span class="t">${new Date(e.at).toLocaleTimeString()}</span><span class="who">${esc(e.actor)}</span>${esc(e.text)}</div>`).join('');
   }
 }
-tick(); setInterval(tick, 1500);
+tick(); setInterval(tick, DEMO ? 4200 : 1500);
 </script>
 </body>
 </html>
