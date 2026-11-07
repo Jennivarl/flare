@@ -3,154 +3,220 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Flare: Live Board</title>
+<title>Flare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   :root {
-    --bg: #0b0f14; --panel: #121820; --line: #1f2a36; --text: #e6edf3; --muted: #8b98a5;
-    --crit: #ff4d4f; --high: #ff8c1a; --med: #f5c518; --low: #5cc8ff; --ok: #33d17a; --rumour: #a970ff; --boat: #4da3ff;
+    --bg: #0d0d0c; --panel: #131311; --raise: #1a1a17; --line: #262522; --text: #ecebe6; --muted: #8f8c84; --faint: #5d5b55;
+    --flare: #ff5b1f; --high: #f2a541; --med: #c9b458; --low: #7d7b75; --ok: #4cc38a; --rumour: #9b8afb;
+    --sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
-    font: 14px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  header { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
-  header h1 { font-size: 16px; margin: 0; letter-spacing: .3px; }
-  header .live { display: inline-flex; align-items: center; gap: 6px; color: var(--crit); font-weight: 700; font-size: 12px; }
-  header .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--crit); animation: pulse 1.2s infinite; }
-  header .sub { color: var(--muted); font-size: 12px; margin-left: auto; }
-  @keyframes pulse { 50% { opacity: .25; } }
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--line); border-bottom: 1px solid var(--line); }
-  .stat { background: var(--panel); padding: 10px 14px; }
-  .stat b { display: block; font-size: 24px; font-variant-numeric: tabular-nums; }
-  .stat span { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
-  .stat.crit b { color: var(--crit); } .stat.ok b { color: var(--ok); } .stat.rumour b { color: var(--rumour); }
-  main { display: grid; grid-template-columns: 1fr 380px; height: calc(100% - 140px); min-height: 420px; }
-  #map { height: 100%; background: #0e141b; }
-  aside { border-left: 1px solid var(--line); overflow: auto; background: var(--panel); }
-  aside h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); margin: 14px 14px 6px; }
-  .ev { padding: 8px 14px; border-bottom: 1px solid var(--line); font-size: 13px; animation: slide .4s ease-out; }
-  .ev .who { font-weight: 600; margin-right: 6px; }
-  .ev .t { color: var(--muted); font-size: 11px; float: right; }
-  .ev.dispatch { border-left: 3px solid var(--ok); } .ev.claim { border-left: 3px solid var(--rumour); }
-  .ev.case { border-left: 3px solid var(--high); } .ev.merge { border-left: 3px solid var(--low); }
-  .ev.zone { border-left: 3px solid var(--boat); } .ev.propose { border-left: 3px solid var(--med); }
-  @keyframes slide { from { opacity: 0; transform: translateX(12px); } }
-  .legend { display: flex; flex-wrap: wrap; gap: 10px; padding: 8px 14px; color: var(--muted); font-size: 12px; }
-  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
-  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--panel); color: var(--text); }
-  .pin { border-radius: 50%; border: 2px solid rgba(255,255,255,.85); box-shadow: 0 0 0 4px rgba(255,77,79,.25); }
-  .pin.pulse { animation: ring 1.4s infinite; }
-  @keyframes ring { 0% { box-shadow: 0 0 0 0 rgba(255,77,79,.7); } 100% { box-shadow: 0 0 0 16px rgba(255,77,79,0); } }
-  .res { font-size: 20px; line-height: 22px; filter: drop-shadow(0 0 3px #000); }
-  .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(.8) contrast(.9) saturate(.6); }
-  .caption { padding: 10px 16px; background: linear-gradient(90deg, rgba(255,77,79,.18), rgba(77,163,255,.12)); border-bottom: 1px solid var(--line); font-size: 15px; animation: slide .4s ease-out; }
-  .caption b { color: var(--crit); margin-right: 8px; font-size: 12px; letter-spacing: .5px; }
-  .sim { position: absolute; bottom: 8px; left: 8px; z-index: 500; background: rgba(0,0,0,.6); color: var(--muted); font-size: 11px; padding: 4px 8px; border-radius: 4px; }
-  @media (max-width: 860px) { main { grid-template-columns: 1fr; height: auto; } #map { height: 60vh; } aside { border-left: 0; } }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 var(--sans); -webkit-font-smoothing: antialiased; }
+  .app { display: grid; grid-template-rows: 56px 1fr; height: 100vh; }
+  header { display: flex; align-items: center; gap: 14px; padding: 0 24px; border-bottom: 1px solid var(--line); }
+  .mark { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; letter-spacing: -.3px; }
+  .mark i { width: 10px; height: 10px; border-radius: 50%; background: var(--flare); box-shadow: 0 0 0 4px rgba(255,91,31,.15); }
+  .mark small { font-weight: 500; color: var(--muted); font-size: 13px; letter-spacing: 0; }
+  .meta { margin-left: auto; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .grid { display: grid; grid-template-columns: 360px 1fr 430px; min-height: 0; }
+  body:not(.demo) .grid { grid-template-columns: 360px 1fr; }
+  body:not(.demo) .room { display: none; }
+
+  /* story column */
+  .story { border-right: 1px solid var(--line); padding: 28px 24px; display: flex; flex-direction: column; gap: 26px; overflow: hidden; }
+  .progress { display: grid; grid-auto-flow: column; gap: 4px; }
+  .progress span { height: 3px; border-radius: 2px; background: var(--line); }
+  .progress span.on { background: var(--flare); }
+  .step { font: 500 12px var(--mono); color: var(--muted); letter-spacing: 1px; }
+  .step b { color: var(--text); font-weight: 500; }
+  .caption { font-size: 25px; line-height: 1.22; font-weight: 600; letter-spacing: -.5px; min-height: 124px; }
+  .caption em { font-style: normal; color: var(--flare); }
+  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .metric { background: var(--panel); padding: 14px 16px; }
+  .metric b { display: block; font: 500 30px/1.1 var(--mono); letter-spacing: -1px; }
+  .metric span { color: var(--muted); font-size: 12px; }
+  .metric.ok b { color: var(--ok); } .metric.flare b { color: var(--flare); } .metric.rumour b { color: var(--rumour); }
+  .label { font: 500 11px var(--mono); color: var(--faint); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px; }
+  .log { display: flex; flex-direction: column; gap: 9px; overflow: hidden; }
+  .log div { display: grid; grid-template-columns: 62px 1fr; gap: 8px; font-size: 12.5px; color: #c9c7c0; }
+  .log div b { font: 500 11px var(--mono); color: var(--muted); padding-top: 2px; }
+  .log div.fresh { color: var(--text); }
+
+  /* map */
+  .mapwrap { position: relative; min-height: 0; }
+  #map { position: absolute; inset: 0; background: #11110f; }
+  .gray-tiles { filter: grayscale(1) invert(1) brightness(.62) contrast(1.15); }
+  .legend { position: absolute; left: 16px; bottom: 16px; z-index: 500; display: flex; gap: 14px; padding: 9px 14px; background: rgba(13,13,12,.88); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; color: var(--muted); }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .sim { position: absolute; right: 16px; bottom: 16px; z-index: 500; font: 500 10.5px var(--mono); color: var(--faint); letter-spacing: .8px; text-transform: uppercase; }
+  .pt { border-radius: 50%; border: 2px solid var(--bg); }
+  .pt.live { box-shadow: 0 0 0 0 rgba(255,91,31,.6); animation: ring 1.8s infinite; }
+  @keyframes ring { to { box-shadow: 0 0 0 14px rgba(255,91,31,0); } }
+  .res { font: 600 10px var(--mono); color: var(--bg); background: var(--text); border-radius: 3px; text-align: center; line-height: 16px; }
+  .res.busy { background: var(--ok); }
+  .leaflet-control-attribution { background: rgba(13,13,12,.7) !important; color: var(--faint) !important; font-size: 10px; }
+  .leaflet-control-attribution a { color: var(--muted) !important; }
+  .leaflet-control-zoom a { background: var(--panel) !important; color: var(--text) !important; border-color: var(--line) !important; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--raise); color: var(--text); }
+  .leaflet-tooltip { background: var(--raise); color: var(--text); border: 1px solid var(--line); }
+
+  /* switch room */
+  .room { border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: var(--panel); }
+  .room-head { padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .room-head b { font-size: 15px; } .room-head b span { color: var(--faint); }
+  .room-head small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .chat { flex: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px 0 14px; }
+  .msg { display: grid; grid-template-columns: 32px 1fr; gap: 11px; padding: 9px 20px; }
+  .msg.fresh { animation: rise .45s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  .av { width: 32px; height: 32px; border-radius: 7px; display: grid; place-items: center; font: 600 12px var(--sans); background: var(--raise); color: var(--text); border: 1px solid var(--line); }
+  .av.agent { background: #2b1c14; color: var(--flare); border-color: #4a2a1a; }
+  .av.switch, .av.approval { color: var(--muted); }
+  .name { font-weight: 600; font-size: 13.5px; }
+  .tag { font: 500 10px var(--mono); color: var(--flare); margin-left: 7px; text-transform: uppercase; letter-spacing: .8px; }
+  .when { font: 400 11px var(--mono); color: var(--faint); margin-left: 7px; }
+  .txt { color: #d7d5ce; font-size: 13.5px; margin-top: 2px; }
+  .msg.switch .txt { color: var(--muted); }
+  .approve { margin-top: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: var(--bg); }
+  .approve .q { font-size: 13px; color: var(--text); }
+  .approve code { display: block; font: 12px var(--mono); color: var(--high); margin-top: 4px; }
+  .approve .btns { display: flex; gap: 8px; margin-top: 10px; }
+  .approve .btns span { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid var(--line); color: var(--muted); }
+  .approve .btns .ok { background: var(--text); color: var(--bg); border-color: var(--text); }
+  @media (max-width: 1100px) { .grid, body:not(.demo) .grid { grid-template-columns: 1fr; } .story, .room { border: 0; } .mapwrap { height: 60vh; } .app { height: auto; } }
 </style>
 </head>
 <body>
-<header>
-  <h1>🛟 Flare</h1>
-  <span class="live"><i></i>LIVE</span>
-  <span class="sub" id="scenario">connecting…</span>
-</header>
-<div id="caption" class="caption" hidden></div>
-<section class="stats" id="stats"></section>
-<main>
-  <div style="position:relative">
-    <div id="map"></div>
-    <div class="sim">SIMULATED SCENARIO: fictional people and messages</div>
-  </div>
-  <aside>
-    <div class="legend">
-      <span><i style="background:var(--crit)"></i>Critical</span><span><i style="background:var(--high)"></i>High</span>
-      <span><i style="background:var(--med)"></i>Medium</span><span><i style="background:var(--low)"></i>Low</span>
-      <span><i style="background:var(--ok)"></i>Rescued</span><span><i style="background:var(--rumour)"></i>Rumour</span>
+<div class="app">
+  <header>
+    <div class="mark"><i></i>Flare <small>crisis control room on Switch</small></div>
+    <div class="meta" id="meta">connecting</div>
+  </header>
+  <div class="grid">
+    <section class="story">
+      <div>
+        <div class="progress" id="progress"></div>
+        <div class="step" id="step" style="margin-top:12px">LIVE BOARD</div>
+      </div>
+      <div class="caption" id="caption">Waiting for the first report.</div>
+      <div class="metrics" id="metrics"></div>
+      <div style="min-height:0;display:flex;flex-direction:column">
+        <div class="label">Board activity</div>
+        <div class="log" id="log"></div>
+      </div>
+    </section>
+    <div class="mapwrap">
+      <div id="map"></div>
+      <div class="legend">
+        <span><i style="background:var(--flare)"></i>Critical</span><span><i style="background:var(--high)"></i>High</span>
+        <span><i style="background:var(--med)"></i>Medium</span><span><i style="background:var(--ok)"></i>Rescued</span>
+        <span><i style="background:var(--rumour)"></i>Rumour</span>
+      </div>
+      <div class="sim">Simulated scenario · fictional people</div>
     </div>
-    <h2>Room activity</h2>
-    <div id="events"></div>
-  </aside>
-</main>
+    <section class="room" id="room">
+      <div class="room-head"><b><span>#</span> flare-hq</b><small>Switch room · Mattermost, with field volunteers on Telegram</small></div>
+      <div class="chat" id="chat"></div>
+    </section>
+  </div>
+</div>
 <script>
-const map = L.map('map', { zoomControl: true }).setView([6.50, 3.43], 12);
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const params = new URLSearchParams(location.search);
+const DEMO = !['127.0.0.1', 'localhost'].includes(location.hostname) || params.has('demo') || params.has('frame');
+const FIXED = params.has('frame') ? Math.max(1, Number(params.get('frame'))) : 0;
+if (DEMO) document.body.classList.add('demo');
+
+const map = L.map('map', { zoomControl: true, attributionControl: true }).setView([6.505, 3.45], 12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 18, className: 'dark-tiles'
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 18, className: 'gray-tiles'
 }).addTo(map);
-
 const layers = { cases: L.layerGroup().addTo(map), res: L.layerGroup().addTo(map), lines: L.layerGroup().addTo(map), zones: L.layerGroup().addTo(map) };
-const color = (c) => c.status === 'rescued' || c.status === 'closed' ? 'var(--ok)'
-  : c.status === 'rumour' ? 'var(--rumour)'
-  : ({5: 'var(--crit)', 4: 'var(--high)', 3: 'var(--med)'}[c.urgency] || 'var(--low)');
-const icons = { boat: '🚤', medical: '🩺', supplies: '🚚' };
-const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (ch) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
-let lastEvent = '';
+const colour = (c) => ['rescued', 'closed'].includes(c.status) ? 'var(--ok)' : c.status === 'rumour' ? 'var(--rumour)'
+  : ({5: 'var(--flare)', 4: 'var(--high)', 3: 'var(--med)'}[c.urgency] || 'var(--low)');
+const shortRes = (r) => ({ boat: 'B', medical: 'M', supplies: 'S' }[r.kind] || 'R') + r.id.split('-')[1];
 
-function statTile(label, value, cls = '') { return `<div class="stat ${cls}"><b>${value}</b><span>${label}</span></div>`; }
-
-// Public demo mode: anywhere except your own computer (or with ?demo), play a recorded crisis in a loop.
-const DEMO = !['127.0.0.1', 'localhost'].includes(location.hostname) || location.search.includes('demo');
-let frames = null, frameIdx = 0;
+let frames = null, idx = 0;
 async function nextState() {
   if (!DEMO) return (await fetch('/api/state', { cache: 'no-store' })).json();
   if (!frames) frames = (await (await fetch('demo.json', { cache: 'no-store' })).json()).frames;
-  const s = frames[frameIdx];
-  frameIdx = (frameIdx + 1) % frames.length;
-  return s;
+  if (FIXED) { idx = FIXED; return frames[FIXED - 1]; }
+  idx = idx % frames.length + 1;
+  return frames[idx - 1];
+}
+
+const initials = (w) => w.split('·')[0].trim().split(/\s+/).map((x) => x[0]).join('').slice(0, 2).toUpperCase();
+function renderChat(upto) {
+  const all = [];
+  frames.slice(0, upto).forEach((f, i) => (f.chat || []).forEach((m, j) => all.push({ ...m, fresh: i === upto - 1, t: `6:${String(11 + i * 2 + j).padStart(2, '0')} PM` })));
+  $('chat').innerHTML = all.slice(-8).map((m) => {
+    const isAgent = m.kind === 'agent', isSys = m.kind === 'switch' || m.kind === 'approval';
+    const body = m.kind === 'approval'
+      ? `<div class="approve"><div class="q">Approval needed</div><code>${esc(m.text)}</code><div class="btns"><span class="ok">Allow once</span><span>Allow for session</span><span>Decline</span></div></div>`
+      : `<div class="txt">${esc(m.text)}</div>`;
+    return `<div class="msg ${m.kind} ${m.fresh ? 'fresh' : ''}"><div class="av ${m.kind}">${isSys ? 'S' : initials(m.who)}</div>
+      <div><span class="name">${esc(m.who)}</span>${isAgent ? '<span class="tag">agent</span>' : ''}<span class="when">${m.t}</span>${body}</div></div>`;
+  }).join('');
+}
+
+const metric = (label, value, cls = '') => `<div class="metric ${cls}"><b>${value}</b><span>${label}</span></div>`;
+function emphasise(text) {
+  return esc(text).replace(/(RUMOUR BLOCKED|Nothing is dropped|human|rescued|exclusive 'dispatcher' role|Allow)/g, '<em>$1</em>');
 }
 
 async function tick() {
   let s;
   try { s = await nextState(); } catch { return; }
-  const cap = document.getElementById('caption');
-  if (DEMO && s.caption) { cap.hidden = false; cap.innerHTML = `<b>Step ${frameIdx || frames.length}/${frames.length}</b> ${esc(s.caption)}`; }
-  document.getElementById('scenario').textContent = DEMO
-    ? 'Recorded demo of a real run · github.com/Jennivarl/flare'
-    : `Scenario: ${s.scenario} · updated ${new Date().toLocaleTimeString()}`;
   const st = s.stats;
-  document.getElementById('stats').innerHTML =
-    statTile('Messages in', st.messages_in) + statTile('Waiting triage', st.messages_waiting) +
-    statTile('Critical open', st.critical_open, 'crit') + statTile('Active cases', st.cases_active) +
-    statTile('Dispatched', st.dispatched) + statTile('People rescued', st.people_rescued, 'ok') +
-    statTile('Duplicates merged', st.duplicates_merged) + statTile('Rumours blocked', st.rumours_blocked, 'rumour') +
-    statTile('Resources free', `${st.resources_free}/${st.resources_total}`);
+  if (DEMO) {
+    const n = frames.length;
+    $('progress').style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+    $('progress').innerHTML = Array.from({ length: n }, (_, i) => `<span class="${i < idx ? 'on' : ''}"></span>`).join('');
+    $('step').innerHTML = `STEP <b>${String(idx).padStart(2, '0')}</b> / ${n}`;
+    $('caption').innerHTML = emphasise(s.caption || '');
+    $('meta').textContent = 'Recorded run · Lagos flood scenario';
+    renderChat(idx);
+  } else {
+    $('meta').textContent = `Live board · ${s.scenario} · ${new Date().toLocaleTimeString()}`;
+    const e = s.events[0];
+    $('caption').textContent = e ? `${e.actor}: ${e.text}` : 'Waiting for the first report.';
+  }
+  $('metrics').innerHTML =
+    metric('People rescued', st.people_rescued, 'ok') + metric('People waiting', st.people_waiting, 'flare') +
+    metric('Rumours blocked', st.rumours_blocked, 'rumour') + metric('Duplicates merged', st.duplicates_merged) +
+    metric('Messages in', st.messages_in) + metric('Boats and teams free', `${st.resources_free}/${st.resources_total}`);
+  $('log').innerHTML = s.events.slice(0, 7).map((e, i) =>
+    `<div class="${i === 0 ? 'fresh' : ''}"><b>${esc(e.actor)}</b><span>${esc(e.text)}</span></div>`).join('');
 
   layers.cases.clearLayers(); layers.res.clearLayers(); layers.lines.clearLayers(); layers.zones.clearLayers();
-  for (const z of s.zones) {
-    L.circle([z.lat, z.lon], { radius: z.radius_km * 1000, color: '#4da3ff', weight: 1, dashArray: '4 4', fillOpacity: .06 })
-      .bindTooltip(`Zone room: ${esc(z.room)}`, { permanent: true, direction: 'top', className: '' }).addTo(layers.zones);
-  }
-  const caseById = {};
+  for (const z of s.zones) L.circle([z.lat, z.lon], { radius: z.radius_km * 1000, color: '#8f8c84', weight: 1, dashArray: '3 5', fillOpacity: .03 }).addTo(layers.zones);
+  const byId = {};
   for (const c of s.cases) {
-    caseById[c.id] = c;
-    const size = 12 + Math.min(c.people || 0, 12);
+    byId[c.id] = c;
+    const size = 12 + Math.min(c.people || 0, 10);
     const live = ['open', 'verifying'].includes(c.status) && c.urgency >= 5;
-    const icon = L.divIcon({ className: '', iconSize: [size, size],
-      html: `<div class="pin ${live ? 'pulse' : ''}" style="width:${size}px;height:${size}px;background:${color(c)}"></div>` });
-    L.marker([c.lat, c.lon], { icon }).bindPopup(
-      `<b>Case #${c.id} · ${esc(c.place)}</b><br>${esc(c.summary)}<br><small>Status: <b>${esc(c.status)}</b> · people: ${c.people} · reports: ${c.reports}${c.note ? '<br>' + esc(c.note) : ''}</small>`
-    ).addTo(layers.cases);
+    L.marker([c.lat, c.lon], { icon: L.divIcon({ className: '', iconSize: [size, size],
+      html: `<div class="pt ${live ? 'live' : ''}" style="width:${size}px;height:${size}px;background:${colour(c)}"></div>` }) })
+      .bindTooltip(`#${c.id} ${esc(c.place)} · ${esc(c.summary)}`).addTo(layers.cases);
   }
   for (const r of s.resources) {
-    const icon = L.divIcon({ className: 'res', iconSize: [22, 22], html: `<span style="opacity:${r.status === 'available' ? 1 : .55}">${icons[r.kind] || '📦'}</span>` });
-    L.marker([r.lat, r.lon], { icon }).bindTooltip(`${esc(r.name)} (${r.status})`).addTo(layers.res);
+    L.marker([r.lat, r.lon], { icon: L.divIcon({ className: '', iconSize: [22, 16], html: `<div class="res ${r.status === 'available' ? '' : 'busy'}">${shortRes(r)}</div>` }) })
+      .bindTooltip(`${esc(r.name)} · ${r.status}`).addTo(layers.res);
   }
   for (const d of s.dispatches) {
-    const c = caseById[d.case_id], r = s.resources.find((x) => x.id === d.resource_id);
+    const c = byId[d.case_id], r = s.resources.find((x) => x.id === d.resource_id);
     if (!c || !r) continue;
-    L.polyline([[r.lat, r.lon], [c.lat, c.lon]], {
-      color: d.status === 'sent' ? '#33d17a' : '#f5c518', weight: 3, dashArray: d.status === 'sent' ? null : '6 6'
-    }).bindTooltip(d.status === 'sent' ? `En route · ETA ${d.eta_min} min · approved by ${esc(d.approved_by)}` : 'Awaiting HQ approval').addTo(layers.lines);
-  }
-  const top = s.events[0] ? s.events[0].at + s.events[0].text : '';
-  if (top !== lastEvent) {
-    lastEvent = top;
-    document.getElementById('events').innerHTML = s.events.map((e) =>
-      `<div class="ev ${esc(e.kind)}"><span class="t">${new Date(e.at).toLocaleTimeString()}</span><span class="who">${esc(e.actor)}</span>${esc(e.text)}</div>`).join('');
+    L.polyline([[r.lat, r.lon], [c.lat, c.lon]], { color: d.status === 'sent' ? '#4cc38a' : '#f2a541', weight: 2.5, dashArray: d.status === 'sent' ? null : '5 6', opacity: .95 })
+      .bindTooltip(d.status === 'sent' ? `En route · ETA ${d.eta_min} min · approved by ${esc(d.approved_by)}` : 'Waiting for HQ approval').addTo(layers.lines);
   }
 }
-tick(); setInterval(tick, DEMO ? 4200 : 1500);
+tick();
+if (!FIXED) setInterval(tick, DEMO ? 5600 : 1500);
 </script>
 </body>
 </html>

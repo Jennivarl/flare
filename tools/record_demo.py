@@ -96,15 +96,15 @@ run("--by", "dispatch", "dispatch", "propose", "6", "med-1")
 run("--by", "dispatch", "dispatch", "propose", "13", "boat-3")
 snap("@dispatcher proposes boats and medics. Nothing moves until a human at HQ approves.")
 
-run("--by", "dispatch", "dispatch", "send", "1", "--approved-by", "Valentine (HQ)")
-run("--by", "dispatch", "dispatch", "send", "2", "--approved-by", "Valentine (HQ)")
+run("--by", "dispatch", "dispatch", "send", "1", "--approved-by", "Ada (HQ)")
+run("--by", "dispatch", "dispatch", "send", "2", "--approved-by", "Ada (HQ)")
 snap("HQ presses Allow in the Switch room. Switch records who approved each dispatch.")
 
 frames.append(json.loads(json.dumps(frames[-1])))
 frames[-1]["events"].insert(0, {"at": frames[-1]["events"][0]["at"], "actor": "switch", "kind": "zone", "text": "@dispatch went offline. The exclusive 'dispatcher' role was released."})
 frames[-1]["caption"] = "The dispatch agent goes down mid-crisis. Switch frees its exclusive 'dispatcher' role."
 
-run("--by", "standby", "dispatch", "send", "3", "--approved-by", "Valentine (HQ)")
+run("--by", "standby", "dispatch", "send", "3", "--approved-by", "Ada (HQ)")
 run("--by", "standby", "dispatch", "propose", "9", "med-2")
 snap("@standby takes the dispatcher role and picks up the exact work left waiting. Nothing is dropped.")
 
@@ -113,9 +113,36 @@ run("--by", "dispatch", "case", "update", "1", "--status", "rescued", "--note", 
 run("--by", "standby", "case", "update", "13", "--status", "rescued", "--note", "Field: both men pulled out of the water")
 snap("Field volunteers confirm on Telegram: rescued. The map turns green.")
 
-run("--by", "standby", "dispatch", "send", "4", "--approved-by", "Valentine (HQ)")
+run("--by", "standby", "dispatch", "send", "4", "--approved-by", "Ada (HQ)")
 run("--by", "standby", "case", "update", "6", "--status", "rescued", "--note", "Baby delivered, mother and child stable")
 snap("Every decision is on the record: who reported, who verified, who approved, who rescued.")
+
+# What the Switch room (#flare-hq, Mattermost + Telegram) shows at each step.
+# who: display name, kind: human | agent | switch | approval
+H, A, S = "human", "agent", "switch"
+CHAT = [
+    [("Ada · HQ", H, "Flood warning for Lagos. The Flare room is live. @intake start triage on the SMS feed.")],
+    [("intake", A, "On it. 8 new messages: Pidgin, Yoruba and English.")],
+    [("intake", A, "4 cases created, 3 critical. Skipped 1 scam asking for BVN numbers. Please warn the public.")],
+    [("intake", A, "2 reports say Third Mainland Bridge collapsed. @verify please check before anyone moves.")],
+    [("Tunde · field (Telegram)", H, "I dey for Third Mainland now. Bridge never fall, na traffic o."),
+     ("intake", A, "6 more cases. 2 eyewitnesses are ON the bridge.")],
+    [("verify", A, "Merged 3 reports of the same Makoko family into case #1 (Mama Bisi + 3 children).")],
+    [("verify", A, "RUMOUR BLOCKED: bridge collapse. 2 eyewitnesses on the bridge; all reports trace to one WhatsApp video. Ready for @dispatcher: #1, #6, #13.")],
+    [("dispatch", A, "#1 Makoko roof → Rescue Boat 1, ETA 8 min · #6 Oworonshoki, labour → Medical Team Alpha · #13 Ajah, 2 men in water → Rescue Boat 3. Approve?"),
+     ("Switch", "approval", "dispatch wants to run: dispatch send 1, 2, 3")],
+    [("Ada · HQ", H, "Yes. Send them."),
+     ("Switch", S, "Allowed once by Ada · HQ. Approval recorded.")],
+    [("Switch", S, "dispatch went offline. Exclusive role 'dispatcher' released."),
+     ("Ada · HQ", H, "@standby the dispatcher is down. Take over.")],
+    [("standby", A, "Dispatcher role taken. Picking up exactly where dispatch stopped: Boat 3 to #13 approved and sent. #9 elder needs insulin → Medical Team Bravo. Approve?")],
+    [("Tunde · field (Telegram)", H, "Mama Bisi and her 3 pikin don comot. Baby dey go clinic."),
+     ("Kemi · field (Telegram)", H, "Both men out of the water at Ajah!")],
+    [("Ada · HQ", H, "Great work everyone. Every decision is on the record."),
+     ("standby", A, "Logged: who reported, who verified, who approved, who rescued.")],
+]
+for f, msgs in zip(frames, CHAT):
+    f["chat"] = [{"who": w, "kind": k, "text": t} for w, k, t in msgs]
 
 out = ROOT / "docs" / "demo.json"
 out.parent.mkdir(exist_ok=True)
