@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python ../../relief.py:*)"
+    ],
+    "ask": [
+      "Bash(python ../../relief.py --by dispatch dispatch send:*)",
+      "Bash(python ../../relief.py dispatch send:*)"
+    ],
+    "deny": [
+      "Bash(sqlite3:*)",
+      "Edit(../../data/**)",
+      "Write(../../data/**)"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python ../../relief.py:*)",
+      "Read(../dispatch/**)"
+    ],
+    "ask": [
+      "Bash(python ../../relief.py --by standby dispatch send:*)",
+      "Bash(python ../../relief.py dispatch send:*)"
+    ],
+    "deny": [
+      "Bash(sqlite3:*)",
+      "Edit(../../data/**)",
+      "Write(../../data/**)"
+    ]
+  }
+}

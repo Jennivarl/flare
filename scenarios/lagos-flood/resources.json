@@ -1,0 +1,10 @@
+[
+  {"id": "boat-1", "kind": "boat", "name": "Rescue Boat 1", "lat": 6.4610, "lon": 3.3950, "capacity": 8},
+  {"id": "boat-2", "kind": "boat", "name": "Rescue Boat 2", "lat": 6.5150, "lon": 3.3990, "capacity": 8},
+  {"id": "boat-3", "kind": "boat", "name": "Rescue Boat 3", "lat": 6.4500, "lon": 3.5000, "capacity": 6},
+  {"id": "boat-4", "kind": "boat", "name": "Rescue Boat 4", "lat": 6.5900, "lon": 3.4600, "capacity": 6},
+  {"id": "med-1", "kind": "medical", "name": "Medical Team Alpha", "lat": 6.5000, "lon": 3.3700, "capacity": 4},
+  {"id": "med-2", "kind": "medical", "name": "Medical Team Bravo", "lat": 6.4500, "lon": 3.4700, "capacity": 4},
+  {"id": "sup-1", "kind": "supplies", "name": "Food and Water Truck 1", "lat": 6.6000, "lon": 3.3600, "capacity": 200},
+  {"id": "sup-2", "kind": "supplies", "name": "Food and Water Truck 2", "lat": 6.4700, "lon": 3.3000, "capacity": 200}
+]

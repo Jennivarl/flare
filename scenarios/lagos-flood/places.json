@@ -1,0 +1,20 @@
+{
+  "Makoko": {"lat": 6.4955, "lon": 3.3885, "aliases": ["makoko waterfront", "makoko community"]},
+  "Ebute Metta": {"lat": 6.4850, "lon": 3.3800, "aliases": ["ebute-metta", "otto"]},
+  "Yaba": {"lat": 6.5095, "lon": 3.3711, "aliases": ["sabo yaba"]},
+  "Surulere": {"lat": 6.5004, "lon": 3.3540, "aliases": ["ojuelegba"]},
+  "Oworonshoki": {"lat": 6.5480, "lon": 3.4000, "aliases": ["oworo"]},
+  "Third Mainland Bridge": {"lat": 6.4990, "lon": 3.4030, "aliases": ["3rd mainland bridge", "third mainland"]},
+  "Ikoyi": {"lat": 6.4549, "lon": 3.4366, "aliases": []},
+  "Victoria Island": {"lat": 6.4281, "lon": 3.4219, "aliases": ["vi", "v.i."]},
+  "Lekki Phase 1": {"lat": 6.4478, "lon": 3.4723, "aliases": ["lekki phase one", "lekki"]},
+  "Chevron Lekki": {"lat": 6.4440, "lon": 3.5330, "aliases": ["chevron", "chevron drive"]},
+  "Ajah": {"lat": 6.4698, "lon": 3.5852, "aliases": ["ajah roundabout"]},
+  "Sangotedo": {"lat": 6.4700, "lon": 3.6400, "aliases": []},
+  "Ikorodu": {"lat": 6.6194, "lon": 3.5105, "aliases": ["ikorodu garage"]},
+  "Mile 12": {"lat": 6.6036, "lon": 3.3940, "aliases": ["mile twelve"]},
+  "Ikeja": {"lat": 6.6018, "lon": 3.3515, "aliases": []},
+  "Festac": {"lat": 6.4660, "lon": 3.2830, "aliases": ["festac town"]},
+  "Isale Eko": {"lat": 6.4550, "lon": 3.3900, "aliases": ["lagos island"]},
+  "Ilaje Bariga": {"lat": 6.5330, "lon": 3.3950, "aliases": ["ilaje", "bariga waterfront"]}
+}
