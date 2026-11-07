@@ -1,10 +1,10 @@
-# 🛟 Relief Room
+# 🛟 Flare
 
 **An AI crisis control room for disaster response, built on [Switch](https://github.com/sandbox-quantum/switch).**
 
 When a city floods, help requests arrive as thousands of messy messages on SMS, WhatsApp and Telegram, in
 several languages. The same family gets reported five times, a rumour sends boats to the wrong place, and the
-real SOS gets lost. Relief Room puts **field volunteers (Telegram)**, **HQ coordinators (Mattermost / Slack)**
+real SOS gets lost. Flare puts **field volunteers (Telegram)**, **HQ coordinators (Mattermost / Slack)**
 and **five AI agents** in one Switch workspace. The agents turn the noise into a verified, prioritised rescue
 board, and **a named human approves every dispatch**.
 
@@ -69,7 +69,7 @@ flowchart LR
 
 ## Why Switch is central (it does not work without it)
 
-| Switch feature | How Relief Room uses it |
+| Switch feature | How Flare uses it |
 |---|---|
 | **Cross-platform bridge** | Field volunteers stay on Telegram (cheap phones, low data); HQ works in Mattermost / Slack. One workspace. |
 | **Many agents, one room, shared context** | Five agents share room Instructions and one board, and hand off by mention (`@verify` → `@dispatcher`). |
@@ -94,8 +94,8 @@ This proves the engine works before you connect any chat app.
 
 1. Get the code:
    ```bash
-   git clone https://github.com/Jennivarl/relief-room.git
-   cd relief-room
+   git clone https://github.com/Jennivarl/flare.git
+   cd flare
    ```
 2. Start a fresh board with the Lagos flood scenario:
    ```bash
@@ -147,11 +147,11 @@ This proves the engine works before you connect any chat app.
 
    | Agent name | Directory | Who can talk to it |
    |---|---|---|
-   | `intake` | `relief-room/agents/intake` | Anyone |
-   | `verify` | `relief-room/agents/verify` | Me and my agents |
-   | `dispatch` | `relief-room/agents/dispatch` | Custom rules: HQ people only |
-   | `standby` | `relief-room/agents/standby` | Custom rules: HQ people only |
-   | `sitrep` | `relief-room/agents/sitrep` | Me and my agents |
+   | `intake` | `flare/agents/intake` | Anyone |
+   | `verify` | `flare/agents/verify` | Me and my agents |
+   | `dispatch` | `flare/agents/dispatch` | Custom rules: HQ people only |
+   | `standby` | `flare/agents/standby` | Custom rules: HQ people only |
+   | `sitrep` | `flare/agents/sitrep` | Me and my agents |
 
    Each folder has a `CLAUDE.md` (the agent's job) and a `.claude/settings.json` (its permissions; dispatch and
    standby must ask before `dispatch send`).
@@ -161,7 +161,7 @@ This proves the engine works before you connect any chat app.
    `@dispatch take the dispatcher role`. Check with `!roles`.
 6. Optional field room: connect Telegram in Switch Console, add your bot to a Telegram group, invite `@intake`
    there and run `!assign-agent @intake` so every message reaches it.
-7. Start the board and map from the `relief-room` folder:
+7. Start the board and map from the `flare` folder:
    ```bash
    python relief.py init
    python relief.py serve        # keep open, then open http://127.0.0.1:8787
@@ -178,7 +178,7 @@ This proves the engine works before you connect any chat app.
    - From Telegram (or the room): `Case 1 rescued, all 4 safe` then `@dispatcher update` → ✅ the case turns green.
 
 **Troubleshooting**
-- Map empty? Make sure `serve` and the agents use the same folder (the board lives in `relief-room/data/relief.db`).
+- Map empty? Make sure `serve` and the agents use the same folder (the board lives in `flare/data/relief.db`).
 - Agent says it is not available? Switch Console must stay open: agents answer only while their session runs.
 - `unknown place`? Run `python relief.py geo "<name>"` to see the known places for the scenario.
 
@@ -191,7 +191,7 @@ This proves the engine works before you connect any chat app.
 - **Technical execution:** zero-dependency Python board (SQLite, standard library only), a live map, a
   reproducible scenario, and per-agent permissions in code. Part A of How to Test runs in 2 minutes.
 - **Creativity and impact:** crisis response is a real, documented problem where chat is already the
-  infrastructure. Relief Room adds verification and accountability, not just speed.
+  infrastructure. Flare adds verification and accountability, not just speed.
 - **Presentation:** a 3-minute video showing the room, the map and the failover live.
 
 ## Project layout

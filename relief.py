@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Relief Room: the shared crisis board that Switch agents work on.
+"""Flare: the shared crisis board that Switch agents work on.
 
 The agents (Intake, Verify, Dispatch, Sitrep) live in a Switch room and run
 these commands. The live map at http://127.0.0.1:8787 reads the same database.
@@ -567,7 +567,7 @@ def cmd_serve(a):
 # --------------------------------------------------------------------------- CLI
 
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="relief", description="Relief Room crisis board")
+    p = argparse.ArgumentParser(prog="relief", description="Flare crisis board")
     p.add_argument("--by", default=os.environ.get("RELIEF_AGENT", "human"), help="who is acting (agent name)")
     sub = p.add_subparsers(dest="cmd", required=True)
 

@@ -1,4 +1,4 @@
-# Relief Room: room Instructions (paste into Switch Console > room > Configuration > Instructions)
+# Flare: room Instructions (paste into Switch Console > room > Configuration > Instructions)
 
 This room coordinates a flood response. People and AI agents work together. Lives depend on accuracy.
 
