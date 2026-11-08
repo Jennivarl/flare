@@ -5,12 +5,22 @@
     ],
     "ask": [
       "Bash(python ../../relief.py --by dispatch dispatch send:*)",
-      "Bash(python ../../relief.py dispatch send:*)"
+      "Bash(python ../../relief.py dispatch send:*)",
+      "Bash(python relief.py --by dispatch dispatch send:*)",
+      "Bash(python relief.py dispatch send:*)",
+      "Bash(python ./relief.py dispatch send:*)",
+      "Bash(python3 ../../relief.py dispatch send:*)"
     ],
     "deny": [
+      "Bash(cd:*)",
+      "Bash(pushd:*)",
       "Bash(sqlite3:*)",
+      "Bash(python -c:*)",
       "Edit(../../data/**)",
-      "Write(../../data/**)"
+      "Write(../../data/**)",
+      "Edit(../../relief.py)",
+      "Edit(.claude/**)",
+      "Write(.claude/**)"
     ]
   }
 }

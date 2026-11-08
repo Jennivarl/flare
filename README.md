@@ -319,6 +319,10 @@ switch/room-instructions.md  room Instructions for Switch
 
 - The scenario is simulated. All people, phone numbers and messages are fictional.
 - AI agents never dispatch on their own: every dispatch needs a named human approval.
+- The approval is enforced below the agent, not by its instructions: `agents/dispatch` and `agents/standby` list every
+  form of `dispatch send` as an **ask** rule, and **deny** `cd`, `python -c`, direct database access and edits to their
+  own rules. In testing, an agent that changed folders slipped past a narrower rule, so the rules were hardened and
+  re-tested: Switch's *Permission needed* prompt now appears every time.
 - Public field rooms never receive names, phone numbers or exact addresses.
 
 ## License
