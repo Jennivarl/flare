@@ -144,6 +144,26 @@ CHAT = [
 for f, msgs in zip(frames, CHAT):
     f["chat"] = [{"who": w, "kind": k, "text": t} for w, k, t in msgs]
 
+# On-screen pointer for each step, in plain words: where to look and what it means.
+MAKOKO, BRIDGE, AJAH = (6.4955, 3.3885), (6.4990, 3.4030), (6.4698, 3.5852)
+FOCUS = [
+    {"type": "chat", "label": "This is the team chat. People and AI work here together"},
+    {"type": "chat", "label": "Calls for help come in"},
+    {"type": "map", "at": MAKOKO, "label": "Each call becomes a dot on the map"},
+    {"type": "map", "at": BRIDGE, "label": "Someone says this bridge fell down"},
+    {"type": "chat", "label": "A man standing on the bridge says it is fine"},
+    {"type": "map", "at": MAKOKO, "label": "Same family reported 3 times. Now counted once"},
+    {"type": "map", "at": BRIDGE, "label": "Fake news stopped. No boat wasted"},
+    {"type": "chat", "label": "AI suggests boats. A person must say yes"},
+    {"type": "map", "at": MAKOKO, "label": "Approved. The boat is on its way"},
+    {"type": "chat", "label": "One AI helper stops working"},
+    {"type": "chat", "label": "The backup AI takes over. Nothing is lost"},
+    {"type": "map", "at": MAKOKO, "label": "Rescued. The dot turns green"},
+    {"type": "metrics", "label": "Every decision is written down"},
+]
+for f, focus in zip(frames, FOCUS):
+    f["focus"] = focus
+
 out = ROOT / "docs" / "demo.json"
 out.parent.mkdir(exist_ok=True)
 out.write_text(json.dumps({"frames": frames}, ensure_ascii=False), encoding="utf-8")

@@ -87,6 +87,14 @@
   .approve .btns { display: flex; gap: 8px; margin-top: 10px; }
   .approve .btns span { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1px solid var(--line); color: var(--muted); }
   .approve .btns .ok { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  /* plain-words pointers (demo) */
+  .leaflet-tooltip.callout { background: var(--text); color: var(--bg); border: 0; border-radius: 10px; padding: 10px 14px; font: 500 19px/1.25 var(--sans); box-shadow: 0 8px 24px rgba(0,0,0,.4); white-space: nowrap; }
+  .leaflet-tooltip-top.callout::before { border-top-color: var(--text); }
+  .chip { align-self: flex-start; margin: 8px 20px 0 63px; background: var(--text); color: var(--bg); font: 500 18px/1.3 var(--sans); padding: 9px 14px; border-radius: 10px; }
+  .msg.focus { box-shadow: inset 3px 0 0 var(--text); background: rgba(236,235,230,.05); }
+  .metrics.focus { outline: 2px solid var(--text); outline-offset: 6px; }
+  .story .chip { margin: 0; }
   @media (max-width: 1100px) { .grid, body:not(.demo) .grid { grid-template-columns: 1fr; } .story, .room { border: 0; } .mapwrap { height: 60vh; } .app { height: auto; } }
 </style>
 </head>
@@ -133,7 +141,7 @@ const map = L.map('map', { zoomControl: true, attributionControl: true }).setVie
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 18, className: 'gray-tiles'
 }).addTo(map);
-const layers = { cases: L.layerGroup().addTo(map), res: L.layerGroup().addTo(map), lines: L.layerGroup().addTo(map), zones: L.layerGroup().addTo(map) };
+const layers = { cases: L.layerGroup().addTo(map), res: L.layerGroup().addTo(map), lines: L.layerGroup().addTo(map), zones: L.layerGroup().addTo(map), focus: L.layerGroup().addTo(map) };
 const colour = (c) => ['rescued', 'closed'].includes(c.status) ? 'var(--ok)' : c.status === 'rumour' ? 'var(--rumour)'
   : ({5: 'var(--flare)', 4: 'var(--high)', 3: 'var(--med)'}[c.urgency] || 'var(--low)');
 const shortRes = (r) => ({ boat: 'B', medical: 'M', supplies: 'S' }[r.kind] || 'R') + r.id.split('-')[1];
@@ -178,6 +186,7 @@ async function tick() {
     $('caption').innerHTML = emphasise((s.caption || '').replace(/\.$/, ''));
     $('meta').textContent = 'Recorded run · Lagos flood scenario';
     renderChat(idx);
+    setTimeout(() => showFocus(s.focus), 0);
   } else {
     $('meta').textContent = `Live board · ${s.scenario} · ${new Date().toLocaleTimeString()}`;
     const e = s.events[0];
@@ -211,6 +220,25 @@ async function tick() {
       .bindTooltip(d.status === 'sent' ? `En route · ETA ${d.eta_min} min · approved by ${esc(d.approved_by)}` : 'Waiting for HQ approval').addTo(layers.lines);
   }
 }
+function showFocus(f) {
+  layers.focus.clearLayers();
+  document.querySelectorAll('.chip').forEach((c) => c.remove());
+  $('metrics').classList.remove('focus');
+  if (!f) return;
+  if (f.type === 'map') {
+    L.circleMarker(f.at, { radius: 30, color: '#ecebe6', weight: 2, dashArray: '5 5', fill: false })
+      .bindTooltip(esc(f.label), { permanent: true, direction: 'top', className: 'callout', offset: [0, -28] }).addTo(layers.focus);
+  } else if (f.type === 'chat') {
+    const msgs = $('chat').querySelectorAll('.msg');
+    const last = msgs[msgs.length - 1];
+    if (last) last.classList.add('focus');
+    $('chat').insertAdjacentHTML('beforeend', `<div class="chip">↑ ${esc(f.label)}</div>`);
+  } else if (f.type === 'metrics') {
+    $('metrics').classList.add('focus');
+    $('metrics').insertAdjacentHTML('afterend', `<div class="chip">↑ ${esc(f.label)}</div>`);
+  }
+}
+
 tick();
 if (!FIXED) setInterval(tick, DEMO ? 4000 : 1500);
 </script>
